@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Můj Osobní Dashboard</title>
+    <title>Osobní Dashboard</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -11,11 +11,7 @@
             --glass-bg: rgba(30, 41, 59, 0.7);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background: var(--bg-color);
@@ -27,11 +23,10 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            transition: background 2s ease; /* Pro plynulou změnu pozadí */
+            transition: background 2s ease;
             overflow-x: hidden;
         }
 
-        /* Skleněný efekt pro karty */
         .glass-card {
             background: var(--glass-bg);
             backdrop-filter: blur(15px);
@@ -45,7 +40,6 @@
             margin-bottom: 20px;
         }
 
-        /* Hodiny */
         #time {
             font-size: clamp(3.5rem, 18vw, 6.5rem);
             font-weight: 800;
@@ -61,13 +55,19 @@
             text-transform: uppercase;
         }
 
-        /* Progres bar dne */
+        #svatek {
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #fbbf24; /* Zlatavá barva pro svátek */
+            font-weight: 500;
+        }
+
         .progress-container {
             width: 100%;
             background: #334155;
-            height: 8px;
+            height: 6px;
             border-radius: 10px;
-            margin: 2rem 0 1rem;
+            margin: 1.5rem 0 0.5rem;
             overflow: hidden;
         }
 
@@ -78,12 +78,6 @@
             transition: width 1s ease-in-out;
         }
 
-        .progress-text {
-            font-size: 0.8rem;
-            color: #64748b;
-        }
-
-        /* Sekce počasí */
         .weather-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -93,40 +87,40 @@
         }
 
         .weather-item {
-            padding: 1.5rem;
+            padding: 1rem;
             border-radius: 20px;
             background: rgba(255, 255, 255, 0.05);
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .city-name { font-weight: bold; color: #94a3b8; margin-bottom: 5px; }
-        .temp { font-size: 1.8rem; font-weight: bold; }
+        .city { font-size: 0.9rem; color: #94a3b8; }
+        .temp { font-size: 1.5rem; font-weight: bold; margin: 5px 0; }
 
-        /* Citát */
         #quote {
             font-style: italic;
             color: #cbd5e1;
             margin-top: 20px;
-            max-width: 500px;
-            line-height: 1.5;
+            font-size: 0.9rem;
+            opacity: 0.8;
         }
 
-        /* Dekorativní koule na pozadí */
         .blob {
             position: absolute;
-            width: 300px;
-            height: 300px;
+            width: 400px;
+            height: 400px;
             background: var(--accent-color);
-            filter: blur(80px);
-            opacity: 0.15;
+            filter: blur(100px);
+            opacity: 0.1;
             z-index: -1;
             border-radius: 50%;
-            animation: move 20s infinite alternate;
+            animation: move 15s infinite alternate;
         }
 
         @keyframes move {
-            from { transform: translate(-20%, -20%); }
-            to { transform: translate(20%, 20%); }
+            from { transform: translate(-30%, -30%); }
+            to { transform: translate(30%, 30%); }
         }
 
         @media (max-width: 480px) {
@@ -141,70 +135,81 @@
     <div class="glass-card">
         <div id="time">00:00:00</div>
         <div id="date">Načítání...</div>
+        <div id="svatek">Dnes má svátek: ...</div>
         
         <div class="progress-container">
             <div id="day-progress"></div>
         </div>
-        <div class="progress-text">Průběh dnešního dne</div>
-
-        <div id="quote">"Tvůj čas je omezený, tak jím neplýtvej."</div>
+        
+        <div id="quote">"Načítání inspirace..."</div>
     </div>
 
     <div class="weather-grid">
         <div class="weather-item glass-card" style="margin:0">
-            <div class="city-name">Praha</div>
-            <div class="temp" id="temp-prague">8°C</div>
+            <span class="city">Praha</span>
+            <span class="temp">8°C</span>
+            <span style="font-size: 0.8rem; color: #64748b;">☁️ Polojasno</span>
         </div>
         <div class="weather-item glass-card" style="margin:0">
-            <div class="city-name">Madrid</div>
-            <div class="temp" id="temp-madrid">19°C</div>
+            <span class="city">Madrid</span>
+            <span class="temp">19°C</span>
+            <span style="font-size: 0.8rem; color: #64748b;">☀️ Jasno</span>
         </div>
     </div>
 
     <script>
+        // Databáze jmenin (zkrácená ukázka pro duben - v reálu bys měl všech 12 měsíců)
+        const names = {
+            3: { // Duben (měsíce jsou v JS od 0, takže 3 = duben)
+                1: "Hugo", 2: "Erika", 3: "Richard", 4: "Ivana", 5: "Miroslava", 6: "Vendula", 7: "Heřman / Hermína",
+                8: "Ema", 9: "Dušan", 10: "Darja", 11: "Izabela", 12: "Julius", 13: "Aleš", 14: "Vincenc", 
+                15: "Anastázie", 16: "Irena", 17: "Rudolf", 18: "Valérie", 19: "Rostislav", 20: "Marcela",
+                21: "Alexandra", 22: "Evženie", 23: "Vojtěch", 24: "Jiří", 25: "Marek", 26: "Oto", 
+                27: "Jaroslav", 28: "Vlastislav", 29: "Robert", 30: "Blahoslav"
+            }
+            // Zde by pokračovaly další měsíce...
+        };
+
         const quotes = [
-            "Každý den je nová šance.",
-            "Soustřeď se na to, co můžeš ovlivnit.",
-            "Nejlepší čas začít byl včera. Druhý nejlepší je dnes.",
-            "Cesta dlouhá tisíc mil začíná prvním krokem.",
-            "Dělej dnes to, za co ti tvé budoucí já poděkuje."
+            "Tvůj čas je omezený, tak jím neplýtvej na život někoho jiného.",
+            "Jediný způsob, jak dělat skvělou práci, je milovat to, co děláš.",
+            "Budoucnost patří těm, kdo věří svým snům.",
+            "Neúspěch je jen příležitost začít znovu, tentokrát inteligentněji.",
+            "Všechno, co jsi kdy chtěl, je na druhé straně strachu."
         ];
 
-        function updateDashboard() {
+        function update() {
             const now = new Date();
-            const h = now.getHours();
-
-            // 1. Čas a Datum
+            
+            // Čas a Datum
             document.getElementById('time').textContent = now.toLocaleTimeString('cs-CZ');
             document.getElementById('date').textContent = now.toLocaleDateString('cs-CZ', { 
                 weekday: 'long', day: 'numeric', month: 'long' 
             });
 
-            // 2. Dynamické pozadí podle hodiny
-            if (h >= 6 && h < 12) document.body.style.background = "#1e293b"; // Ráno
-            else if (h >= 12 && h < 18) document.body.style.background = "#0f172a"; // Den
-            else document.body.style.background = "#020617"; // Noc
+            // Svátek (logika pro duben, jako příklad)
+            const month = now.getMonth();
+            const day = now.getDate();
+            const nameToday = (names[month] && names[month][day]) ? names[month][day] : "Neznámé jméno";
+            document.getElementById('svatek').textContent = `Dnes má svátek: ${nameToday}`;
 
-            // 3. Procento dne
-            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-            const endOfDay = startOfDay + 86400000;
-            const progress = ((now.getTime() - startOfDay) / (endOfDay - startOfDay)) * 100;
+            // Průběh dne
+            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            const progress = ((now.getTime() - start) / 86400000) * 100;
             document.getElementById('day-progress').style.width = progress + "%";
+
+            // Dynamické pozadí
+            const h = now.getHours();
+            if (h >= 5 && h < 11) document.body.style.background = "linear-gradient(to bottom, #1e293b, #0f172a)";
+            else if (h >= 11 && h < 18) document.body.style.background = "linear-gradient(to bottom, #0f172a, #020617)";
+            else document.body.style.background = "#020617";
         }
 
-        // 4. Náhodný citát (při každém načtení)
+        // Citát při načtení
         document.getElementById('quote').textContent = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
 
-        // 5. Počasí (Simulace pro ukázku - zde by se volalo API)
-        // Pro reálné počasí bys použil: fetch(URL_ZDE).then(...)
-        function updateWeather() {
-            // Tady jsou statické hodnoty, v reálu by se měnily přes API
-            console.log("Počasí aktualizováno...");
-        }
-
-        setInterval(updateDashboard, 1000);
-        updateDashboard();
-        updateWeather();
+        setInterval(update, 1000);
+        update();
     </script>
 </body>
 </html>
