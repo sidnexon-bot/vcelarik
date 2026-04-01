@@ -3,180 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Můj Smart Dashboard</title>
+    <title>Smart Dashboard</title>
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --accent-color: #38bdf8;
-            --glass-bg: rgba(30, 41, 59, 0.7);
-        }
-
+        :root { --bg-color: #0f172a; --accent-color: #38bdf8; --glass-bg: rgba(30, 41, 59, 0.7); }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
-            background: var(--bg-color);
-            color: #f8fafc;
+            background: var(--bg-color); color: #f8fafc;
             font-family: 'Segoe UI', system-ui, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            transition: background 2s ease;
+            min-height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 20px;
         }
-
         .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 600px;
-            margin-bottom: 20px;
+            background: var(--glass-bg); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px;
+            padding: 2rem; text-align: center; width: 100%; max-width: 500px; margin-bottom: 20px;
         }
-
-        #time {
-            font-size: clamp(3.5rem, 18vw, 6rem);
-            font-weight: 800;
-            color: var(--accent-color);
-            line-height: 1;
-            font-variant-numeric: tabular-nums;
-        }
-
+        #time { font-size: clamp(3.5rem, 15vw, 6rem); font-weight: 800; color: var(--accent-color); line-height: 1; }
         #date { font-size: 1.2rem; color: #94a3b8; margin-top: 10px; text-transform: uppercase; }
         #svatek { color: #fbbf24; margin-top: 5px; font-weight: 500; }
-
-        .progress-container {
-            width: 100%;
-            background: #334155;
-            height: 6px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-
-        #day-progress {
-            height: 100%; width: 0%;
-            background: linear-gradient(90deg, #38bdf8, #818cf8);
-            transition: width 1s;
-        }
-
-        /* Počasí Grid */
-        .weather-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            width: 100%;
-            max-width: 600px;
-        }
-
-        .weather-item {
-            padding: 1.5rem;
-            background: rgba(255,255,255,0.05);
-            border-radius: 20px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .city-label { color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px; display: block; }
-        .temp-val { font-size: 1.8rem; font-weight: bold; color: #fff; }
-        .desc-val { font-size: 0.8rem; color: #64748b; display: block; margin-top: 5px; }
-
-        .blob {
-            position: absolute; width: 400px; height: 400px;
-            background: var(--accent-color); filter: blur(100px);
-            opacity: 0.1; z-index: -1; border-radius: 50%;
-            animation: move 15s infinite alternate;
-        }
-
-        @keyframes move { from { transform: translate(-20%, -20%); } to { transform: translate(20%, 20%); } }
-        @media (max-width: 480px) { .weather-grid { grid-template-columns: 1fr; } }
+        .progress-container { width: 100%; background: #334155; height: 6px; border-radius: 10px; margin: 20px 0; overflow: hidden; }
+        #day-progress { height: 100%; width: 0%; background: linear-gradient(90deg, #38bdf8, #818cf8); transition: width 1s; }
+        .weather-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 500px; }
+        .weather-item { padding: 1.5rem; background: rgba(255,255,255,0.05); border-radius: 20px; text-align: center; }
+        .temp-val { font-size: 2rem; font-weight: bold; display: block; }
+        .city-label { color: #94a3b8; font-size: 0.9rem; }
     </style>
 </head>
 <body>
-
-    <div class="blob"></div>
 
     <div class="glass-card">
         <div id="time">00:00:00</div>
         <div id="date">Načítání...</div>
         <div id="svatek">Zjišťuji svátek...</div>
-        
-        <div class="progress-container">
-            <div id="day-progress"></div>
-        </div>
+        <div class="progress-container"><div id="day-progress"></div></div>
     </div>
 
     <div class="weather-grid">
         <div class="weather-item glass-card" style="margin:0">
             <span class="city-label">Praha</span>
-            <div id="temp-praha" class="temp-val">--°C</div>
-            <span id="desc-praha" class="desc-val">načítání...</span>
+            <span id="temp-praha" class="temp-val">--°C</span>
         </div>
         <div class="weather-item glass-card" style="margin:0">
             <span class="city-label">Madrid</span>
-            <div id="temp-madrid" class="temp-val">--°C</div>
-            <span id="desc-madrid" class="desc-val">načítání...</span>
+            <span id="temp-madrid" class="temp-val">--°C</span>
         </div>
     </div>
 
     <script>
-    const names = { 3: { 1: "Hugo", 2: "Erika", 3: "Richard", 4: "Ivana", 5: "Miroslava", 6: "Vendula", 7: "Heřman", 8: "Ema", 9: "Dušan", 10: "Darja", 11: "Izabela", 12: "Julius", 13: "Aleš", 14: "Vincenc", 15: "Anastázie", 16: "Irena", 17: "Rudolf", 18: "Valérie", 19: "Rostislav", 20: "Marcela", 21: "Alexandra", 22: "Evženie", 23: "Vojtěch", 24: "Jiří", 25: "Marek", 26: "Oto", 27: "Jaroslav", 28: "Vlastislav", 29: "Robert", 30: "Blahoslav" } };
+        const names = { 3: { 1: "Hugo", 2: "Erika", 3: "Richard", 4: "Ivana", 5: "Miroslava", 6: "Vendula", 7: "Heřman", 8: "Ema", 9: "Dušan", 10: "Darja", 11: "Izabela", 12: "Julius", 13: "Aleš", 14: "Vincenc", 15: "Anastázie", 16: "Irena", 17: "Rudolf", 18: "Valérie", 19: "Rostislav", 20: "Marcela", 21: "Alexandra", 22: "Evženie", 23: "Vojtěch", 24: "Jiří", 25: "Marek", 26: "Oto", 27: "Jaroslav", 28: "Vlastislav", 29: "Robert", 30: "Blahoslav" } };
 
-    function updateCore() {
-        const now = new Date();
-        document.getElementById('time').textContent = now.toLocaleTimeString('cs-CZ');
-        document.getElementById('date').textContent = now.toLocaleDateString('cs-CZ', { weekday: 'long', day: 'numeric', month: 'long' });
-        const name = names[now.getMonth()] ? names[now.getMonth()][now.getDate()] : "Neznámé";
-        document.getElementById('svatek').textContent = `Svátek má: ${name}`;
-        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-        const progress = ((now.getTime() - start) / 86400000) * 100;
-        document.getElementById('day-progress').style.width = progress + "%";
-    }
-
-    async function fetchWeather(country, tempId, descId) {
-        // Změna: RapidAPI občas vyžaduje přesné kódování názvů v URL
-        const url = `https://weather-request.p.rapidapi.com/weather/${encodeURIComponent(country)}`;
-        const options = {
-            method: 'GET',
-            headers: {
-                'x-rapidapi-key': '4e8a50e2aemsh43f5a2b6ecfb086p1fbdd1jsnababe7e3389d',
-                'x-rapidapi-host': 'weather-request.p.rapidapi.com'
-            }
-        };
-
-        try {
-            const response = await fetch(url, options);
-            if (!response.ok) throw new Error(`Status: ${response.status}`);
-            
-            const result = await response.json();
-            console.log(`Data pro ${country}:`, result); // Koukni do konzole F12, co přesně přišlo
-
-            // Oprava čtení dat: zkusíme různé klíče, které toto API může vracet
-            const temp = result.current_temp || result.temperature || result.temp || (result.data && result.data.temp);
-            const desc = result.description || result.weather || (result.data && result.data.description);
-
-            if (temp !== undefined) {
-                document.getElementById(tempId).textContent = `${temp}°C`;
-                document.getElementById(descId).textContent = desc || 'Aktuálně';
-            } else {
-                document.getElementById(descId).textContent = "Formát dat nenalezen";
-            }
-        } catch (error) {
-            console.error(`Chyba u ${country}:`, error);
-            document.getElementById(descId).textContent = "Chyba připojení";
+        function updateCore() {
+            const now = new Date();
+            document.getElementById('time').textContent = now.toLocaleTimeString('cs-CZ');
+            document.getElementById('date').textContent = now.toLocaleDateString('cs-CZ', { weekday: 'long', day: 'numeric', month: 'long' });
+            const name = names[now.getMonth()] ? names[now.getMonth()][now.getDate()] : "Neznámé";
+            document.getElementById('svatek').textContent = `Svátek má: ${name}`;
+            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            const progress = ((now.getTime() - start) / 86400000) * 100;
+            document.getElementById('day-progress').style.width = progress + "%";
         }
-    }
 
-    setInterval(updateCore, 1000);
-    updateCore();
+        async function fetchWeather(lat, lon, elementId) {
+            try {
+                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                const data = await response.json();
+                document.getElementById(elementId).textContent = `${Math.round(data.current_weather.temperature)}°C`;
+            } catch (e) {
+                document.getElementById(elementId).textContent = "??°C";
+            }
+        }
 
-    // Zkusíme nejdřív jednu zemi pro test
-    fetchWeather('Czech Republic', 'temp-praha', 'desc-praha');
-    fetchWeather('Spain', 'temp-madrid', 'desc-madrid');
-</script>
+        setInterval(updateCore, 1000);
+        updateCore();
+
+        // Praha (lat: 50.08, lon: 14.43), Madrid (lat: 40.41, lon: -3.70)
+        fetchWeather(50.08, 14.43, 'temp-praha');
+        fetchWeather(40.41, -3.70, 'temp-madrid');
+    </script>
 </body>
 </html>
