@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Dashboard</title>
+    <title>Můj Smart Dashboard</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -47,40 +47,9 @@
             font-variant-numeric: tabular-nums;
         }
 
-        #date {
-            font-size: 1.2rem;
-            color: #94a3b8;
-            margin-top: 10px;
-            text-transform: uppercase;
-        }
+        #date { font-size: 1.2rem; color: #94a3b8; margin-top: 10px; text-transform: uppercase; }
+        #svatek { color: #fbbf24; margin-top: 5px; font-weight: 500; }
 
-        #svatek {
-            color: #fbbf24;
-            margin-top: 5px;
-            font-weight: 500;
-        }
-
-        /* Sekce pro API Událost */
-        .event-box {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            text-align: left;
-        }
-
-        .event-title {
-            color: var(--accent-color);
-            font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .event-info {
-            font-size: 0.9rem;
-            color: #cbd5e1;
-        }
-
-        /* Progress bar */
         .progress-container {
             width: 100%;
             background: #334155;
@@ -90,12 +59,12 @@
         }
 
         #day-progress {
-            height: 100%;
-            width: 0%;
+            height: 100%; width: 0%;
             background: linear-gradient(90deg, #38bdf8, #818cf8);
             transition: width 1s;
         }
 
+        /* Počasí Grid */
         .weather-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -105,21 +74,21 @@
         }
 
         .weather-item {
-            padding: 1rem;
+            padding: 1.5rem;
             background: rgba(255,255,255,0.05);
             border-radius: 20px;
             text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
+        .city-label { color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px; display: block; }
+        .temp-val { font-size: 1.8rem; font-weight: bold; color: #fff; }
+        .desc-val { font-size: 0.8rem; color: #64748b; display: block; margin-top: 5px; }
+
         .blob {
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            background: var(--accent-color);
-            filter: blur(100px);
-            opacity: 0.1;
-            z-index: -1;
-            border-radius: 50%;
+            position: absolute; width: 400px; height: 400px;
+            background: var(--accent-color); filter: blur(100px);
+            opacity: 0.1; z-index: -1; border-radius: 50%;
             animation: move 15s infinite alternate;
         }
 
@@ -139,54 +108,44 @@
         <div class="progress-container">
             <div id="day-progress"></div>
         </div>
-
-        <div class="event-box">
-            <span class="event-title">Nadcházející událost:</span>
-            <div id="event-content" class="event-info">Načítám data z RapidAPI...</div>
-        </div>
     </div>
 
     <div class="weather-grid">
         <div class="weather-item glass-card" style="margin:0">
-            <div style="color: #94a3b8;">Praha</div>
-            <div style="font-size: 1.5rem; font-weight: bold;">8°C</div>
+            <span class="city-label">Praha</span>
+            <div id="temp-praha" class="temp-val">--°C</div>
+            <span id="desc-praha" class="desc-val">načítání...</span>
         </div>
         <div class="weather-item glass-card" style="margin:0">
-            <div style="color: #94a3b8;">Madrid</div>
-            <div style="font-size: 1.5rem; font-weight: bold;">19°C</div>
+            <span class="city-label">Madrid</span>
+            <div id="temp-madrid" class="temp-val">--°C</div>
+            <span id="desc-madrid" class="desc-val">načítání...</span>
         </div>
     </div>
 
     <script>
-        // Kalendář pro Duben (ukázka)
-        const names = {
-            3: { 1: "Hugo", 2: "Erika", 3: "Richard", 4: "Ivana", 5: "Miroslava", 6: "Vendula", 7: "Heřman", 8: "Ema", 9: "Dušan", 10: "Darja", 11: "Izabela", 12: "Julius", 13: "Aleš", 14: "Vincenc", 15: "Anastázie", 16: "Irena", 17: "Rudolf", 18: "Valérie", 19: "Rostislav", 20: "Marcela", 21: "Alexandra", 22: "Evženie", 23: "Vojtěch", 24: "Jiří", 25: "Marek", 26: "Oto", 27: "Jaroslav", 28: "Vlastislav", 29: "Robert", 30: "Blahoslav" }
-        };
+        // Svátek - duben
+        const names = { 3: { 1: "Hugo", 2: "Erika", 3: "Richard", 4: "Ivana", 5: "Miroslava", 6: "Vendula", 7: "Heřman", 8: "Ema", 9: "Dušan", 10: "Darja", 11: "Izabela", 12: "Julius", 13: "Aleš", 14: "Vincenc", 15: "Anastázie", 16: "Irena", 17: "Rudolf", 18: "Valérie", 19: "Rostislav", 20: "Marcela", 21: "Alexandra", 22: "Evženie", 23: "Vojtěch", 24: "Jiří", 25: "Marek", 26: "Oto", 27: "Jaroslav", 28: "Vlastislav", 29: "Robert", 30: "Blahoslav" } };
 
-        // 1. FUNKCE PRO ČAS A DESIGN
         function updateCore() {
             const now = new Date();
             document.getElementById('time').textContent = now.toLocaleTimeString('cs-CZ');
             document.getElementById('date').textContent = now.toLocaleDateString('cs-CZ', { weekday: 'long', day: 'numeric', month: 'long' });
-            
-            // Svátek
             const name = names[now.getMonth()] ? names[now.getMonth()][now.getDate()] : "Neznámé";
             document.getElementById('svatek').textContent = `Svátek má: ${name}`;
-
-            // Progress dne
             const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
             const progress = ((now.getTime() - start) / 86400000) * 100;
             document.getElementById('day-progress').style.width = progress + "%";
         }
 
-        // 2. TVOJE API FUNKCE (RAPID API)
-        async function fetchRapidAPI() {
-            const url = 'https://real-time-events-search.p.rapidapi.com/event-details?event_id=L2F1dGhvcml0eS9ob3Jpem9uL2NsdXN0ZXJlZF9ldmVudC8yMDI1LTEwLTEwfDEyMzU2NDg0MzM2NjU5NjE0MzM1';
+        // NAČÍTÁNÍ POČASÍ PŘES TVOJE RAPID API
+        async function fetchWeather(country, tempId, descId) {
+            const url = `https://weather-request.p.rapidapi.com/weather/${country}`;
             const options = {
                 method: 'GET',
                 headers: {
                     'x-rapidapi-key': '4e8a50e2aemsh43f5a2b6ecfb086p1fbdd1jsnababe7e3389d',
-                    'x-rapidapi-host': 'real-time-events-search.p.rapidapi.com'
+                    'x-rapidapi-host': 'weather-request.p.rapidapi.com'
                 }
             };
 
@@ -194,26 +153,24 @@
                 const response = await fetch(url, options);
                 const result = await response.json();
                 
-                // Zpracování dat (přizpůsob podle toho, co API vrací)
-                if (result.data) {
-                    const event = result.data;
-                    document.getElementById('event-content').innerHTML = `
-                        <strong>${event.name || 'Událost'}</strong><br>
-                        ${event.venue ? event.venue.name : 'Místo neuvedeno'}
-                    `;
-                } else {
-                    document.getElementById('event-content').textContent = "Událost nenalezena.";
+                // Přizpůsobení podle struktury tvého API (předpokládám standardní JSON)
+                if (result) {
+                    document.getElementById(tempId).textContent = `${result.current_temp || result.temperature || '??'}°C`;
+                    document.getElementById(descId).textContent = result.description || 'Aktuální stav';
                 }
             } catch (error) {
                 console.error(error);
-                document.getElementById('event-content').textContent = "Nepodařilo se načíst data.";
+                document.getElementById(descId).textContent = "Chyba API";
             }
         }
 
-        // Spuštění
+        // Spuštění všeho
         setInterval(updateCore, 1000);
         updateCore();
-        fetchRapidAPI(); // Voláme jen jednou při načtení, abychom šetřili limity
+
+        // Zavoláme počasí pro obě země
+        fetchWeather('Czech Republic', 'temp-praha', 'desc-praha');
+        fetchWeather('Spain', 'temp-madrid', 'desc-madrid');
     </script>
 </body>
 </html>
