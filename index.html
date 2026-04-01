@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digitální Hodiny</title>
+    <style>
+        /* CSS Stylizace */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0f172a; /* Tmavě modré pozadí */
+            color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .clock-container {
+            text-align: center;
+            background: rgba(30, 41, 59, 0.7);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+            backdrop-filter: blur(10px);
+        }
+
+        #time {
+            font-size: 6rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #38bdf8; /* Světle modrá barva času */
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+            line-height: 1;
+        }
+
+        #date {
+            font-size: 1.5rem;
+            margin-top: 1rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="clock-container">
+        <div id="time">00:00:00</div>
+        <div id="date">Načítání data...</div>
+    </div>
+
+    <script>
+        // JavaScript pro aktualizaci času
+        function updateClock() {
+            const now = new Date();
+
+            // Formátování času (HH:MM:SS)
+            const timeString = now.toLocaleTimeString('cs-CZ');
+            
+            // Formátování data
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateString = now.toLocaleDateString('cs-CZ', options);
+
+            // Vypsání do HTML
+            document.getElementById('time').textContent = timeString;
+            document.getElementById('date').textContent = dateString;
+        }
+
+        // Spustit funkci každou sekundu
+        setInterval(updateClock, 1000);
+
+        // Vyvolat ihned po načtení stránky
+        updateClock();
+    </script>
+
+</body>
+</html>
