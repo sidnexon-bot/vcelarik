@@ -124,53 +124,59 @@
     </div>
 
     <script>
-        // Svátek - duben
-        const names = { 3: { 1: "Hugo", 2: "Erika", 3: "Richard", 4: "Ivana", 5: "Miroslava", 6: "Vendula", 7: "Heřman", 8: "Ema", 9: "Dušan", 10: "Darja", 11: "Izabela", 12: "Julius", 13: "Aleš", 14: "Vincenc", 15: "Anastázie", 16: "Irena", 17: "Rudolf", 18: "Valérie", 19: "Rostislav", 20: "Marcela", 21: "Alexandra", 22: "Evženie", 23: "Vojtěch", 24: "Jiří", 25: "Marek", 26: "Oto", 27: "Jaroslav", 28: "Vlastislav", 29: "Robert", 30: "Blahoslav" } };
+    const names = { 3: { 1: "Hugo", 2: "Erika", 3: "Richard", 4: "Ivana", 5: "Miroslava", 6: "Vendula", 7: "Heřman", 8: "Ema", 9: "Dušan", 10: "Darja", 11: "Izabela", 12: "Julius", 13: "Aleš", 14: "Vincenc", 15: "Anastázie", 16: "Irena", 17: "Rudolf", 18: "Valérie", 19: "Rostislav", 20: "Marcela", 21: "Alexandra", 22: "Evženie", 23: "Vojtěch", 24: "Jiří", 25: "Marek", 26: "Oto", 27: "Jaroslav", 28: "Vlastislav", 29: "Robert", 30: "Blahoslav" } };
 
-        function updateCore() {
-            const now = new Date();
-            document.getElementById('time').textContent = now.toLocaleTimeString('cs-CZ');
-            document.getElementById('date').textContent = now.toLocaleDateString('cs-CZ', { weekday: 'long', day: 'numeric', month: 'long' });
-            const name = names[now.getMonth()] ? names[now.getMonth()][now.getDate()] : "Neznámé";
-            document.getElementById('svatek').textContent = `Svátek má: ${name}`;
-            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-            const progress = ((now.getTime() - start) / 86400000) * 100;
-            document.getElementById('day-progress').style.width = progress + "%";
-        }
+    function updateCore() {
+        const now = new Date();
+        document.getElementById('time').textContent = now.toLocaleTimeString('cs-CZ');
+        document.getElementById('date').textContent = now.toLocaleDateString('cs-CZ', { weekday: 'long', day: 'numeric', month: 'long' });
+        const name = names[now.getMonth()] ? names[now.getMonth()][now.getDate()] : "Neznámé";
+        document.getElementById('svatek').textContent = `Svátek má: ${name}`;
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const progress = ((now.getTime() - start) / 86400000) * 100;
+        document.getElementById('day-progress').style.width = progress + "%";
+    }
 
-        // NAČÍTÁNÍ POČASÍ PŘES TVOJE RAPID API
-        async function fetchWeather(country, tempId, descId) {
-            const url = `https://weather-request.p.rapidapi.com/weather/${country}`;
-            const options = {
-                method: 'GET',
-                headers: {
-                    'x-rapidapi-key': '4e8a50e2aemsh43f5a2b6ecfb086p1fbdd1jsnababe7e3389d',
-                    'x-rapidapi-host': 'weather-request.p.rapidapi.com'
-                }
-            };
-
-            try {
-                const response = await fetch(url, options);
-                const result = await response.json();
-                
-                // Přizpůsobení podle struktury tvého API (předpokládám standardní JSON)
-                if (result) {
-                    document.getElementById(tempId).textContent = `${result.current_temp || result.temperature || '??'}°C`;
-                    document.getElementById(descId).textContent = result.description || 'Aktuální stav';
-                }
-            } catch (error) {
-                console.error(error);
-                document.getElementById(descId).textContent = "Chyba API";
+    async function fetchWeather(country, tempId, descId) {
+        // Změna: RapidAPI občas vyžaduje přesné kódování názvů v URL
+        const url = `https://weather-request.p.rapidapi.com/weather/${encodeURIComponent(country)}`;
+        const options = {
+            method: 'GET',
+            headers: {
+                'x-rapidapi-key': '4e8a50e2aemsh43f5a2b6ecfb086p1fbdd1jsnababe7e3389d',
+                'x-rapidapi-host': 'weather-request.p.rapidapi.com'
             }
+        };
+
+        try {
+            const response = await fetch(url, options);
+            if (!response.ok) throw new Error(`Status: ${response.status}`);
+            
+            const result = await response.json();
+            console.log(`Data pro ${country}:`, result); // Koukni do konzole F12, co přesně přišlo
+
+            // Oprava čtení dat: zkusíme různé klíče, které toto API může vracet
+            const temp = result.current_temp || result.temperature || result.temp || (result.data && result.data.temp);
+            const desc = result.description || result.weather || (result.data && result.data.description);
+
+            if (temp !== undefined) {
+                document.getElementById(tempId).textContent = `${temp}°C`;
+                document.getElementById(descId).textContent = desc || 'Aktuálně';
+            } else {
+                document.getElementById(descId).textContent = "Formát dat nenalezen";
+            }
+        } catch (error) {
+            console.error(`Chyba u ${country}:`, error);
+            document.getElementById(descId).textContent = "Chyba připojení";
         }
+    }
 
-        // Spuštění všeho
-        setInterval(updateCore, 1000);
-        updateCore();
+    setInterval(updateCore, 1000);
+    updateCore();
 
-        // Zavoláme počasí pro obě země
-        fetchWeather('Czech Republic', 'temp-praha', 'desc-praha');
-        fetchWeather('Spain', 'temp-madrid', 'desc-madrid');
-    </script>
+    // Zkusíme nejdřív jednu zemi pro test
+    fetchWeather('Czech Republic', 'temp-praha', 'desc-praha');
+    fetchWeather('Spain', 'temp-madrid', 'desc-madrid');
+</script>
 </body>
 </html>
