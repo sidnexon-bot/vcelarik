@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digitální Hodiny</title>
+    <title>Mobilní Digitální Hodiny</title>
     <style>
-        /* CSS Stylizace */
         * {
             margin: 0;
             padding: 0;
@@ -13,41 +12,50 @@
         }
 
         body {
-            background-color: #0f172a; /* Tmavě modré pozadí */
+            background-color: #0f172a;
             color: #f8fafc;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh; /* Použito min-height pro lepší stabilitu na mobilu */
+            margin: 0;
         }
 
         .clock-container {
             text-align: center;
-            background: rgba(30, 41, 59, 0.7);
-            padding: 3rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            border: 1px solid #334155;
-            backdrop-filter: blur(10px);
+            background: rgba(30, 41, 59, 0.8);
+            /* Šířka kontejneru se přizpůsobí mobilu */
+            width: 90%;
+            max-width: 500px;
+            padding: 2.5rem 1rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
         }
 
         #time {
-            font-size: 6rem;
-            font-weight: bold;
-            letter-spacing: 2px;
-            color: #38bdf8; /* Světle modrá barva času */
-            text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
-            line-height: 1;
+            /* Dynamická velikost písma: minimálně 3rem, ideálně 15% šířky, maximálně 6rem */
+            font-size: clamp(3rem, 15vw, 6rem);
+            font-weight: 800;
+            color: #38bdf8;
+            line-height: 1.1;
+            font-variant-numeric: tabular-nums; /* Zabrání poskakování čísel při změně */
         }
 
         #date {
-            font-size: 1.5rem;
-            margin-top: 1rem;
+            font-size: clamp(1rem, 4vw, 1.4rem);
+            margin-top: 1.5rem;
             color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.05em;
+        }
+
+        /* Drobná úprava pro velmi malé telefony */
+        @media (max-width: 350px) {
+            .clock-container {
+                padding: 1.5rem 0.5rem;
+            }
         }
     </style>
 </head>
@@ -55,30 +63,28 @@
 
     <div class="clock-container">
         <div id="time">00:00:00</div>
-        <div id="date">Načítání data...</div>
+        <div id="date">Načítání...</div>
     </div>
 
     <script>
-        // JavaScript pro aktualizaci času
         function updateClock() {
             const now = new Date();
 
-            // Formátování času (HH:MM:SS)
-            const timeString = now.toLocaleTimeString('cs-CZ');
+            // Čas v českém formátu
+            document.getElementById('time').textContent = now.toLocaleTimeString('cs-CZ');
             
-            // Formátování data
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const dateString = now.toLocaleDateString('cs-CZ', options);
-
-            // Vypsání do HTML
-            document.getElementById('time').textContent = timeString;
-            document.getElementById('date').textContent = dateString;
+            // Datum v českém formátu (zkrácený den pro mobily)
+            const options = { 
+                weekday: 'short', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('date').textContent = now.toLocaleDateString('cs-CZ', options);
         }
 
-        // Spustit funkci každou sekundu
+        // Tikání každou sekundu
         setInterval(updateClock, 1000);
-
-        // Vyvolat ihned po načtení stránky
         updateClock();
     </script>
 
