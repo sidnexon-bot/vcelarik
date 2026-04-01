@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mobilní Digitální Hodiny</title>
+    <title>Můj Osobní Dashboard</title>
     <style>
+        :root {
+            --bg-color: #0f172a;
+            --accent-color: #38bdf8;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,81 +18,193 @@
         }
 
         body {
-            background-color: #0f172a;
+            background: var(--bg-color);
             color: #f8fafc;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            min-height: 100vh; /* Použito min-height pro lepší stabilitu na mobilu */
-            margin: 0;
+            justify-content: center;
+            padding: 20px;
+            transition: background 2s ease; /* Pro plynulou změnu pozadí */
+            overflow-x: hidden;
         }
 
-        .clock-container {
-            text-align: center;
-            background: rgba(30, 41, 59, 0.8);
-            /* Šířka kontejneru se přizpůsobí mobilu */
-            width: 90%;
-            max-width: 500px;
-            padding: 2.5rem 1rem;
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        /* Skleněný efekt pro karty */
+        .glass-card {
+            background: var(--glass-bg);
             backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
         }
 
+        /* Hodiny */
         #time {
-            /* Dynamická velikost písma: minimálně 3rem, ideálně 15% šířky, maximálně 6rem */
-            font-size: clamp(3rem, 15vw, 6rem);
+            font-size: clamp(3.5rem, 18vw, 6.5rem);
             font-weight: 800;
-            color: #38bdf8;
-            line-height: 1.1;
-            font-variant-numeric: tabular-nums; /* Zabrání poskakování čísel při změně */
+            color: var(--accent-color);
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
         }
 
         #date {
-            font-size: clamp(1rem, 4vw, 1.4rem);
-            margin-top: 1.5rem;
+            font-size: clamp(1rem, 4vw, 1.3rem);
             color: #94a3b8;
-            letter-spacing: 0.05em;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
         }
 
-        /* Drobná úprava pro velmi malé telefony */
-        @media (max-width: 350px) {
-            .clock-container {
-                padding: 1.5rem 0.5rem;
-            }
+        /* Progres bar dne */
+        .progress-container {
+            width: 100%;
+            background: #334155;
+            height: 8px;
+            border-radius: 10px;
+            margin: 2rem 0 1rem;
+            overflow: hidden;
+        }
+
+        #day-progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+            transition: width 1s ease-in-out;
+        }
+
+        .progress-text {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        /* Sekce počasí */
+        .weather-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .weather-item {
+            padding: 1.5rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            text-align: center;
+        }
+
+        .city-name { font-weight: bold; color: #94a3b8; margin-bottom: 5px; }
+        .temp { font-size: 1.8rem; font-weight: bold; }
+
+        /* Citát */
+        #quote {
+            font-style: italic;
+            color: #cbd5e1;
+            margin-top: 20px;
+            max-width: 500px;
+            line-height: 1.5;
+        }
+
+        /* Dekorativní koule na pozadí */
+        .blob {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: var(--accent-color);
+            filter: blur(80px);
+            opacity: 0.15;
+            z-index: -1;
+            border-radius: 50%;
+            animation: move 20s infinite alternate;
+        }
+
+        @keyframes move {
+            from { transform: translate(-20%, -20%); }
+            to { transform: translate(20%, 20%); }
+        }
+
+        @media (max-width: 480px) {
+            .weather-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <div class="clock-container">
+    <div class="blob"></div>
+
+    <div class="glass-card">
         <div id="time">00:00:00</div>
         <div id="date">Načítání...</div>
+        
+        <div class="progress-container">
+            <div id="day-progress"></div>
+        </div>
+        <div class="progress-text">Průběh dnešního dne</div>
+
+        <div id="quote">"Tvůj čas je omezený, tak jím neplýtvej."</div>
+    </div>
+
+    <div class="weather-grid">
+        <div class="weather-item glass-card" style="margin:0">
+            <div class="city-name">Praha</div>
+            <div class="temp" id="temp-prague">8°C</div>
+        </div>
+        <div class="weather-item glass-card" style="margin:0">
+            <div class="city-name">Madrid</div>
+            <div class="temp" id="temp-madrid">19°C</div>
+        </div>
     </div>
 
     <script>
-        function updateClock() {
-            const now = new Date();
+        const quotes = [
+            "Každý den je nová šance.",
+            "Soustřeď se na to, co můžeš ovlivnit.",
+            "Nejlepší čas začít byl včera. Druhý nejlepší je dnes.",
+            "Cesta dlouhá tisíc mil začíná prvním krokem.",
+            "Dělej dnes to, za co ti tvé budoucí já poděkuje."
+        ];
 
-            // Čas v českém formátu
+        function updateDashboard() {
+            const now = new Date();
+            const h = now.getHours();
+
+            // 1. Čas a Datum
             document.getElementById('time').textContent = now.toLocaleTimeString('cs-CZ');
-            
-            // Datum v českém formátu (zkrácený den pro mobily)
-            const options = { 
-                weekday: 'short', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            };
-            document.getElementById('date').textContent = now.toLocaleDateString('cs-CZ', options);
+            document.getElementById('date').textContent = now.toLocaleDateString('cs-CZ', { 
+                weekday: 'long', day: 'numeric', month: 'long' 
+            });
+
+            // 2. Dynamické pozadí podle hodiny
+            if (h >= 6 && h < 12) document.body.style.background = "#1e293b"; // Ráno
+            else if (h >= 12 && h < 18) document.body.style.background = "#0f172a"; // Den
+            else document.body.style.background = "#020617"; // Noc
+
+            // 3. Procento dne
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            const endOfDay = startOfDay + 86400000;
+            const progress = ((now.getTime() - startOfDay) / (endOfDay - startOfDay)) * 100;
+            document.getElementById('day-progress').style.width = progress + "%";
         }
 
-        // Tikání každou sekundu
-        setInterval(updateClock, 1000);
-        updateClock();
-    </script>
+        // 4. Náhodný citát (při každém načtení)
+        document.getElementById('quote').textContent = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
 
+        // 5. Počasí (Simulace pro ukázku - zde by se volalo API)
+        // Pro reálné počasí bys použil: fetch(URL_ZDE).then(...)
+        function updateWeather() {
+            // Tady jsou statické hodnoty, v reálu by se měnily přes API
+            console.log("Počasí aktualizováno...");
+        }
+
+        setInterval(updateDashboard, 1000);
+        updateDashboard();
+        updateWeather();
+    </script>
 </body>
 </html>
