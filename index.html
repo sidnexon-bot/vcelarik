@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Osobní Dashboard</title>
+    <title>Můj Smart Dashboard</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -24,7 +24,6 @@
             justify-content: center;
             padding: 20px;
             transition: background 2s ease;
-            overflow-x: hidden;
         }
 
         .glass-card {
@@ -41,7 +40,7 @@
         }
 
         #time {
-            font-size: clamp(3.5rem, 18vw, 6.5rem);
+            font-size: clamp(3.5rem, 18vw, 6rem);
             font-weight: 800;
             color: var(--accent-color);
             line-height: 1;
@@ -49,33 +48,52 @@
         }
 
         #date {
-            font-size: clamp(1rem, 4vw, 1.3rem);
+            font-size: 1.2rem;
             color: #94a3b8;
-            margin-top: 0.5rem;
+            margin-top: 10px;
             text-transform: uppercase;
         }
 
         #svatek {
-            margin-top: 10px;
-            font-size: 1rem;
-            color: #fbbf24; /* Zlatavá barva pro svátek */
+            color: #fbbf24;
+            margin-top: 5px;
             font-weight: 500;
         }
 
+        /* Sekce pro API Událost */
+        .event-box {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: left;
+        }
+
+        .event-title {
+            color: var(--accent-color);
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .event-info {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        /* Progress bar */
         .progress-container {
             width: 100%;
             background: #334155;
             height: 6px;
             border-radius: 10px;
-            margin: 1.5rem 0 0.5rem;
-            overflow: hidden;
+            margin: 20px 0;
         }
 
         #day-progress {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #38bdf8, #818cf8);
-            transition: width 1s ease-in-out;
+            transition: width 1s;
         }
 
         .weather-grid {
@@ -88,22 +106,9 @@
 
         .weather-item {
             padding: 1rem;
+            background: rgba(255,255,255,0.05);
             border-radius: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .city { font-size: 0.9rem; color: #94a3b8; }
-        .temp { font-size: 1.5rem; font-weight: bold; margin: 5px 0; }
-
-        #quote {
-            font-style: italic;
-            color: #cbd5e1;
-            margin-top: 20px;
-            font-size: 0.9rem;
-            opacity: 0.8;
+            text-align: center;
         }
 
         .blob {
@@ -118,14 +123,8 @@
             animation: move 15s infinite alternate;
         }
 
-        @keyframes move {
-            from { transform: translate(-30%, -30%); }
-            to { transform: translate(30%, 30%); }
-        }
-
-        @media (max-width: 480px) {
-            .weather-grid { grid-template-columns: 1fr; }
-        }
+        @keyframes move { from { transform: translate(-20%, -20%); } to { transform: translate(20%, 20%); } }
+        @media (max-width: 480px) { .weather-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -135,99 +134,86 @@
     <div class="glass-card">
         <div id="time">00:00:00</div>
         <div id="date">Načítání...</div>
-        <div id="svatek">Dnes má svátek: ...</div>
+        <div id="svatek">Zjišťuji svátek...</div>
         
         <div class="progress-container">
             <div id="day-progress"></div>
         </div>
-        
-        <div id="quote">"Načítání inspirace..."</div>
+
+        <div class="event-box">
+            <span class="event-title">Nadcházející událost:</span>
+            <div id="event-content" class="event-info">Načítám data z RapidAPI...</div>
+        </div>
     </div>
 
     <div class="weather-grid">
         <div class="weather-item glass-card" style="margin:0">
-            <span class="city">Praha</span>
-            <span class="temp">8°C</span>
-            <span style="font-size: 0.8rem; color: #64748b;">☁️ Polojasno</span>
+            <div style="color: #94a3b8;">Praha</div>
+            <div style="font-size: 1.5rem; font-weight: bold;">8°C</div>
         </div>
         <div class="weather-item glass-card" style="margin:0">
-            <span class="city">Madrid</span>
-            <span class="temp">19°C</span>
-            <span style="font-size: 0.8rem; color: #64748b;">☀️ Jasno</span>
+            <div style="color: #94a3b8;">Madrid</div>
+            <div style="font-size: 1.5rem; font-weight: bold;">19°C</div>
         </div>
     </div>
 
     <script>
-        // Databáze jmenin (zkrácená ukázka pro duben - v reálu bys měl všech 12 měsíců)
+        // Kalendář pro Duben (ukázka)
         const names = {
-            3: { // Duben (měsíce jsou v JS od 0, takže 3 = duben)
-                1: "Hugo", 2: "Erika", 3: "Richard", 4: "Ivana", 5: "Miroslava", 6: "Vendula", 7: "Heřman / Hermína",
-                8: "Ema", 9: "Dušan", 10: "Darja", 11: "Izabela", 12: "Julius", 13: "Aleš", 14: "Vincenc", 
-                15: "Anastázie", 16: "Irena", 17: "Rudolf", 18: "Valérie", 19: "Rostislav", 20: "Marcela",
-                21: "Alexandra", 22: "Evženie", 23: "Vojtěch", 24: "Jiří", 25: "Marek", 26: "Oto", 
-                27: "Jaroslav", 28: "Vlastislav", 29: "Robert", 30: "Blahoslav"
-            }
-            // Zde by pokračovaly další měsíce...
+            3: { 1: "Hugo", 2: "Erika", 3: "Richard", 4: "Ivana", 5: "Miroslava", 6: "Vendula", 7: "Heřman", 8: "Ema", 9: "Dušan", 10: "Darja", 11: "Izabela", 12: "Julius", 13: "Aleš", 14: "Vincenc", 15: "Anastázie", 16: "Irena", 17: "Rudolf", 18: "Valérie", 19: "Rostislav", 20: "Marcela", 21: "Alexandra", 22: "Evženie", 23: "Vojtěch", 24: "Jiří", 25: "Marek", 26: "Oto", 27: "Jaroslav", 28: "Vlastislav", 29: "Robert", 30: "Blahoslav" }
         };
 
-        const quotes = [
-            "Tvůj čas je omezený, tak jím neplýtvej na život někoho jiného.",
-            "Jediný způsob, jak dělat skvělou práci, je milovat to, co děláš.",
-            "Budoucnost patří těm, kdo věří svým snům.",
-            "Neúspěch je jen příležitost začít znovu, tentokrát inteligentněji.",
-            "Všechno, co jsi kdy chtěl, je na druhé straně strachu."
-        ];
-
-        function update() {
+        // 1. FUNKCE PRO ČAS A DESIGN
+        function updateCore() {
             const now = new Date();
-            
-            // Čas a Datum
             document.getElementById('time').textContent = now.toLocaleTimeString('cs-CZ');
-            document.getElementById('date').textContent = now.toLocaleDateString('cs-CZ', { 
-                weekday: 'long', day: 'numeric', month: 'long' 
-            });
+            document.getElementById('date').textContent = now.toLocaleDateString('cs-CZ', { weekday: 'long', day: 'numeric', month: 'long' });
+            
+            // Svátek
+            const name = names[now.getMonth()] ? names[now.getMonth()][now.getDate()] : "Neznámé";
+            document.getElementById('svatek').textContent = `Svátek má: ${name}`;
 
-            // Svátek (logika pro duben, jako příklad)
-            const month = now.getMonth();
-            const day = now.getDate();
-            const nameToday = (names[month] && names[month][day]) ? names[month][day] : "Neznámé jméno";
-            document.getElementById('svatek').textContent = `Dnes má svátek: ${nameToday}`;
-
-            // Průběh dne
+            // Progress dne
             const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
             const progress = ((now.getTime() - start) / 86400000) * 100;
             document.getElementById('day-progress').style.width = progress + "%";
-
-            // Dynamické pozadí
-            const h = now.getHours();
-            if (h >= 5 && h < 11) document.body.style.background = "linear-gradient(to bottom, #1e293b, #0f172a)";
-            else if (h >= 11 && h < 18) document.body.style.background = "linear-gradient(to bottom, #0f172a, #020617)";
-            else document.body.style.background = "#020617";
-
-            const url = 'https://real-time-events-search.p.rapidapi.com/event-details?event_id=L2F1dGhvcml0eS9ob3Jpem9uL2NsdXN0ZXJlZF9ldmVudC8yMDI1LTEwLTEwfDEyMzU2NDg0MzM2NjU5NjE0MzM1';
-const options = {
-	method: 'GET',
-	headers: {
-		'x-rapidapi-key': '4e8a50e2aemsh43f5a2b6ecfb086p1fbdd1jsnababe7e3389d',
-		'x-rapidapi-host': 'real-time-events-search.p.rapidapi.com',
-		'Content-Type': 'application/json'
-	}
-};
-
-try {
-	const response = await fetch(url, options);
-	const result = await response.text();
-	console.log(result);
-} catch (error) {
-	console.error(error);
-}
         }
 
-        // Citát při načtení
-        document.getElementById('quote').textContent = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
+        // 2. TVOJE API FUNKCE (RAPID API)
+        async function fetchRapidAPI() {
+            const url = 'https://real-time-events-search.p.rapidapi.com/event-details?event_id=L2F1dGhvcml0eS9ob3Jpem9uL2NsdXN0ZXJlZF9ldmVudC8yMDI1LTEwLTEwfDEyMzU2NDg0MzM2NjU5NjE0MzM1';
+            const options = {
+                method: 'GET',
+                headers: {
+                    'x-rapidapi-key': '4e8a50e2aemsh43f5a2b6ecfb086p1fbdd1jsnababe7e3389d',
+                    'x-rapidapi-host': 'real-time-events-search.p.rapidapi.com'
+                }
+            };
 
-        setInterval(update, 1000);
-        update();
+            try {
+                const response = await fetch(url, options);
+                const result = await response.json();
+                
+                // Zpracování dat (přizpůsob podle toho, co API vrací)
+                if (result.data) {
+                    const event = result.data;
+                    document.getElementById('event-content').innerHTML = `
+                        <strong>${event.name || 'Událost'}</strong><br>
+                        ${event.venue ? event.venue.name : 'Místo neuvedeno'}
+                    `;
+                } else {
+                    document.getElementById('event-content').textContent = "Událost nenalezena.";
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('event-content').textContent = "Nepodařilo se načíst data.";
+            }
+        }
+
+        // Spuštění
+        setInterval(updateCore, 1000);
+        updateCore();
+        fetchRapidAPI(); // Voláme jen jednou při načtení, abychom šetřili limity
     </script>
 </body>
 </html>
